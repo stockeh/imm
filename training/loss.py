@@ -78,7 +78,7 @@ class IMMLoss(torch.nn.Module):
 
         return torch.maximum(s, r)
 
-    def forward(self, model, x, ema, class_labels=None):
+    def forward(self, model, x, class_labels=None):
         net = model.module if isinstance(model, DistributedDataParallel) else model
 
         B = x.shape[0]
@@ -102,7 +102,9 @@ class IMMLoss(torch.nn.Module):
 
         y_t = model(x_t, t, s, class_labels=class_labels).view(G, M, -1)  # [G, M, D]
         with torch.no_grad():  # stop grad
-            y_r = ema(x_r, r, s, class_labels=class_labels).view(G, M, -1)  # [G, M, D]
+            y_r = model(x_r, r, s, class_labels=class_labels).view(
+                G, M, -1
+            )  # [G, M, D]
 
         # group‑wise loss and kernel weights
         w_l = self.loss_weight(net, t_g)  # [G]
