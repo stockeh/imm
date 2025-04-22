@@ -97,8 +97,8 @@ class IMMLoss(torch.nn.Module):
         r = r_g.repeat_interleave(M).view(B, 1, 1, 1)
 
         noise = torch.randn_like(x) * net.sigma_data
-        x_t = net.ddim(noise, x, t, torch.ones_like(t))
-        x_r = net.ddim(x_t, x, r, t)
+        x_t = net.ddim(noise, x, t=torch.ones_like(t), s=t)
+        x_r = net.ddim(x_t, x, t=t, s=r)
 
         y_t = model(x_t, t, s, class_labels=class_labels).view(G, M, -1)  # [G, M, D]
         with torch.no_grad():  # stop grad
